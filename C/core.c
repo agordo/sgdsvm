@@ -23,7 +23,7 @@ void sgd_train_class_cv(int cls,
         float *W, float *B,
         float *PlattsA, float *PlattsB,
         sgd_output_info_t *output)
-{              
+{
     float bestMap = 0;
     int h,i,j,k,l;
 
@@ -57,7 +57,6 @@ void sgd_train_class_cv(int cls,
             }
         }
     }
-
 
 #pragma omp parallel for private(l)
     for (i=0; i < ncombs; i++)
@@ -172,11 +171,11 @@ void sgd_train_class(int cls,
 
             /*printf("End of epoch %d/%d. %d updates. Accumulated loss: %.2f\n", epoch, epochs,updates, accLoss);*/
             compute_scores(W,*B*params->bias_multiplier,  Nval,  d,    Xval,scoresVal);
-            float map = compute_mapk_100(Nval, scoresVal, Lval,3);
+            float map = compute_mapk(Nval, scoresVal, Lval,1500);
             //printf("validation score at end of epoch %d/%d: %.2f\n", epoch, epochs, map*100);
             if (map > bestMap)
             {
-               LOGIT("%.3f CLS %d with config eta %f lbd %.8f beta %d bm: %f epoch %d\n", map*100, cls,params->eta0, params->lbd,params->beta, params->bias_multiplier, epoch+1);
+                //LOGIT("%.3f CLS %d with config eta %f lbd %.8f beta %d bm: %f epoch %d\n", map*100, cls,params->eta0, params->lbd,params->beta, params->bias_multiplier, epoch+1);
                 noimprov=0;
                 /*
                  * printf("Improved validation score at end of epoch %d/%d: %.2f\n", epoch, epochs, map*100);
@@ -212,15 +211,14 @@ void sgd_train_class(int cls,
     {
         /*printf("End of epoch %d/%d. %d updates. Accumulated loss: %.2f\n", epoch, epochs,updates, accLoss);*/
         compute_scores(W,*B*params->bias_multiplier,  Nval,  d,   Xval,  scoresVal);
-        float map = compute_mapk_100(Nval, scoresVal, Lval,3);
-
+        float map = compute_mapk(Nval, scoresVal, Lval,1500);
         if (map > bestMap)
         {
             /*
              * printf("Improved validation score at end of epoch %d/%d: %.2f\n", epoch, epochs, map*100);
              * mexEvalString("drawnow");
              */
-            LOGIT("%.3f CLS %d with config eta %f lbd %.8f beta %d bm: %f epoch %d\n", map*100, cls,params->eta0, params->lbd,params->beta, params->bias_multiplier, epoch+1);
+            //LOGIT("%.3f CLS %d with config eta %f lbd %.8f beta %d bm: %f epoch %d\n", map*100, cls,params->eta0, params->lbd,params->beta, params->bias_multiplier, epoch+1);
             memcpy(bestW, W, d*sizeof(float));
             bestB = B[0];
             bestMap = map;
@@ -281,11 +279,15 @@ void train_epoch( int Ntrain, int d, float* Xtrain, int *Ltrain,  int* perm,
 
     for (i=0; i < Ntrain; i++)
     {
-        /* Get the samples */
+	/* Get the samples */
 	xi = Xtrain + perm[i]*d;
         yi = Ltrain[perm[i]];
-
-
+	//LOGIT("sample %d\n", i);
+	//for (int kk=0; kk < 20; kk++) {LOGIT("%.4f ", xi[kk]);} LOGIT("\n");
+	//LOGIT("current W: ");
+	//for (int kk=0; kk < 20; kk++) {LOGIT("%.4f ", W[kk]);} LOGIT("\n");
+	//LOGIT("current B: %.4f\n", *B); 
+	//LOGIT("label: %d\n", yi);
         eta = params->eta0;
         if (updateEta)
         {
@@ -293,6 +295,7 @@ void train_epoch( int Ntrain, int d, float* Xtrain, int *Ltrain,  int* perm,
             eta = eta / (1 + params->lbd * eta * *t);
 
         }
+	//LOGIT("eta: %f\n", eta);
         /* Use sample only if pos or if nneg < npos * beta. Otherwise skip
          * sample altogether. IE, skip if sample is negative and there are
          * too many negatives already*/
@@ -303,6 +306,7 @@ void train_epoch( int Ntrain, int d, float* Xtrain, int *Ltrain,  int* perm,
         /* Get score*/
         /*s = dp_slow(d, W,xi) / wDivisor;*/
         s= (vec_dotprod(W, xi,d) + *B*params->bias_multiplier) / wDivisor;
+	//LOGIT("score: %f\n", s);
         /* Update the daming factor part*/
         wDivisor = wDivisor / (1 - eta * params->lbd);
         /* If things get out of hand, actually update w and set the divisor
@@ -316,6 +320,7 @@ void train_epoch( int Ntrain, int d, float* Xtrain, int *Ltrain,  int* perm,
 
         /* Get Loss*/
         L_ovr = max(0, 1 - yi *s);
+	//LOGIT("loss: %f\n", L_ovr);
         if (L_ovr > 0)
         {
             float reweight = (yi==1?params->weightPos:params->weightNeg);

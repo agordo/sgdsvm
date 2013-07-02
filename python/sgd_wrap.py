@@ -77,6 +77,21 @@ class pq_info_t(Structure):
 
 
 
+lsgd.sgd_train_class_cv.argtypes = [c_int # c
+                           ,c_int #Ntrain
+                           ,c_int #d
+				, POINTER(c_float) #Xtrain
+                           ,np.ctypeslib.ndpointer(dtype= c_int, ndim=1) #Ltrain
+                           ,c_int #Nval
+			   , POINTER(c_float) #Xval
+                           ,np.ctypeslib.ndpointer(dtype= c_int, ndim=1) #Lval  
+                           ,POINTER(sgd_cv_params_t)
+                           ,np.ctypeslib.ndpointer(dtype=c_float, ndim=1) #*W
+                           ,POINTER(c_float) #*B
+                           ,POINTER(c_float) #*PlattsA
+                           ,POINTER(c_float) #*PlattsB
+                           ,POINTER(sgd_output_info_t)]
+
 
 lsgd.sgd_train_class_cv_pq.argtypes = [c_int # c
                 , POINTER(pq_info_t)
@@ -120,7 +135,7 @@ def sgdalbert_train_cv_oneclass(cls,  Xtrain,Ltrain,Xval,Lval,  params):
     plattsA_tmp=c_float()
     plattsB_tmp=c_float()    
     info = sgd_output_info_t()
-    lsgd.sgd_train_class_cv(ntrain,d,  Xtrain,Ltrain.T[0],nval, Xval,Lval.T[0],byref(params),W, byref(bias_tmp), byref(plattsA_tmp), byref(plattsB_tmp), byref(info))
+    lsgd.sgd_train_class_cv(cls,ntrain,d,  Xtrain.ravel().ctypes.data_as(POINTER(c_float)),Ltrain,nval, Xval.ravel().ctypes.data_as(POINTER(c_float)),Lval,byref(params),W, byref(bias_tmp), byref(plattsA_tmp), byref(plattsB_tmp), byref(info))
     return W,bias_tmp.value,plattsA_tmp.value,plattsB_tmp.value,info
 
 
