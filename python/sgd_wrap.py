@@ -1,8 +1,13 @@
 import numpy as np
 from numpy import ctypeslib
 import ctypes
+import inspect, os
 from ctypes import *
-lsgd = ctypes.cdll.LoadLibrary("../libsgdsvm.so")
+
+# Find the dll path so it can be loaded
+dlldir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+lsgd = ctypes.cdll.LoadLibrary("%s/libsgdsvm.so"%dlldir)
+
 
 lsgd.Platts.argtypes = [np.ctypeslib.ndpointer(dtype=c_float, ndim=1) #*scores
                         ,np.ctypeslib.ndpointer(dtype= c_int, ndim=1) #Lval  
