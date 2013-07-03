@@ -165,13 +165,12 @@ void sgd_train_class(int cls,
         train_epoch(Ntrain, d, Xtrain, Ltrain,perm,  params, 1, &t, W,B);
         
 
-
         if (Nval!=0 && (epoch %  params->eval_freq==0))
         {
 
             /*printf("End of epoch %d/%d. %d updates. Accumulated loss: %.2f\n", epoch, epochs,updates, accLoss);*/
             compute_scores(W,*B*params->bias_multiplier,  Nval,  d,    Xval,scoresVal);
-            float map = compute_mapk(Nval, scoresVal, Lval,1500);
+            float map = compute_map(Nval, scoresVal, Lval);
             //printf("validation score at end of epoch %d/%d: %.2f\n", epoch, epochs, map*100);
             if (map > bestMap)
             {
@@ -186,10 +185,10 @@ void sgd_train_class(int cls,
                 bestMap = map;
                 if (output!=NULL)
                 {
-                    output->eta0=params->eta0;
+                    output->eta0=params->eta0;                    
                     output->acc = bestMap*100;
                     output->epoch = epoch+1;
-                    output->updates = t;                    
+                    output->updates = t;                                        
                 }
             }
             else
@@ -211,7 +210,7 @@ void sgd_train_class(int cls,
     {
         /*printf("End of epoch %d/%d. %d updates. Accumulated loss: %.2f\n", epoch, epochs,updates, accLoss);*/
         compute_scores(W,*B*params->bias_multiplier,  Nval,  d,   Xval,  scoresVal);
-        float map = compute_mapk(Nval, scoresVal, Lval,1500);
+        float map = compute_map(Nval, scoresVal, Lval);
         if (map > bestMap)
         {
             /*
@@ -224,10 +223,10 @@ void sgd_train_class(int cls,
             bestMap = map;
             if (output!=NULL)
             {
-                output->eta0=params->eta0;
+                output->eta0=params->eta0;                
                 output->acc = bestMap*100;
                 output->epoch = params->epochs;
-                output->updates = t;
+                output->updates = t;                 
             }
         }
     }
