@@ -78,7 +78,10 @@ class pq_info_t(Structure):
             ("nsq", c_int32),
             ("ksq", c_int32),
             ("dsq", c_int32),
-            ("centroids", POINTER(c_float))]
+            ("centroids", POINTER(c_float)),
+            ("centroidsSquaredNorms", POINTER(c_float)),
+            ("nblocks", c_int32),            
+            ]
 
 
 
@@ -131,7 +134,7 @@ lsgd.sgd_train_class_pq.argtypes = [c_int # c
 
 
 
-def sgdalbert_train_cv_oneclass(cls,  Xtrain,Ltrain,Xval,Lval,  params):
+def sgdsvm_train_cv_oneclass(cls,  Xtrain,Ltrain,Xval,Lval,  params):
     d = Xtrain.shape[1]
     ntrain = len(Ltrain)
     nval = len(Lval)
@@ -140,11 +143,24 @@ def sgdalbert_train_cv_oneclass(cls,  Xtrain,Ltrain,Xval,Lval,  params):
     plattsA_tmp=c_float()
     plattsB_tmp=c_float()    
     info = sgd_output_info_t()
-    lsgd.sgd_train_class_cv(cls,ntrain,d,  Xtrain.ravel().ctypes.data_as(POINTER(c_float)),Ltrain,nval, Xval.ravel().ctypes.data_as(POINTER(c_float)),Lval,byref(params),W, byref(bias_tmp), byref(plattsA_tmp), byref(plattsB_tmp), byref(info))
+    lsgd.sgd_train_class_cv(cls,
+            ntrain,
+            d,
+            Xtrain.ravel().ctypes.data_as(POINTER(c_float)),
+            Ltrain,
+            nval,
+            Xval.ravel().ctypes.data_as(POINTER(c_float)),
+            Lval,
+            byref(params),
+            W,
+            byref(bias_tmp),
+            byref(plattsA_tmp),
+            byref(plattsB_tmp), 
+            byref(info))
     return W,bias_tmp.value,plattsA_tmp.value,plattsB_tmp.value,info
 
 
-def sgdalbert_train_cv_pq_oneclass(cls,pq,  Xtrain_pqcodes,Ltrain,Xval_pqcodes,Lval,  params):
+def sgdsvm_train_cv_pq_oneclass(cls,pq,  Xtrain_pqcodes,Ltrain,Xval_pqcodes,Lval,  params):
     d = pq.nsq*pq.dsq
     ntrain = len(Ltrain)
     nval = len(Lval)
@@ -153,6 +169,20 @@ def sgdalbert_train_cv_pq_oneclass(cls,pq,  Xtrain_pqcodes,Ltrain,Xval_pqcodes,L
     plattsA_tmp=c_float()
     plattsB_tmp=c_float()    
     info = sgd_output_info_t()
-    lsgd.sgd_train_class_cv_pq(cls,byref(pq),  ntrain,d,  Xtrain_pqcodes,Ltrain.T[0],nval, Xval_pqcodes,Lval.T[0],byref(params),W, byref(bias_tmp), byref(plattsA_tmp), byref(plattsB_tmp), byref(info))
+    lsgd.sgd_train_class_cv_pq(cls,
+            byref(pq),
+            ntrain,
+            d,
+            Xtrain_pqcodes,
+            Ltrain,
+            nval,
+            Xval_pqcodes,
+            Lval,
+            byref(params),
+            W,
+            byref(bias_tmp), 
+            byref(plattsA_tmp),
+            byref(plattsB_tmp),
+            byref(info))
     return W,bias_tmp.value,plattsA_tmp.value,plattsB_tmp.value,info
 

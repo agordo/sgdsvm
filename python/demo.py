@@ -1,6 +1,6 @@
 import numpy as np
 from  sgd_wrap import sgd_cv_params_t
-from sgd_wrap import sgdalbert_train_cv_oneclass
+from sgd_wrap import sgdsvm_train_cv_oneclass
 from ctypes import POINTER, c_int32, c_float
 # Load data
 Xtrain = np.loadtxt("../datasets/ijcnn1/ijcnn1.tr.data", dtype=np.float32)
@@ -30,7 +30,7 @@ params.eval_freq = 2
 params.t = 0
 params.weightPos = 1
 params.weightNeg = 1
-[W,Bias,PlattsA,PlatsB, info] = sgdalbert_train_cv_oneclass(1,  Xtrain,Ltrain,Xvalid,Lvalid,  params)
+[W,Bias,PlattsA,PlatsB, info] = sgdsvm_train_cv_oneclass(1,  Xtrain,Ltrain,Xvalid,Lvalid,  params)
 print "map on validation: %.2f"%(info.acc)
 print "eta0: %.6f lbd: %.8f beta: %d epoch: %d"%(info.eta0, info.lbd, info.beta, info.epoch)
 
