@@ -178,7 +178,7 @@ void sgd_train_class_pq(int cls, pq_info_t *pq,
 
             /*printf("End of epoch %d/%d. %d updates. Accumulated loss: %.2f\n", epoch, epochs,updates, accLoss);*/
             compute_scores_pq(W,*B*params->bias_multiplier, pq, Nval,  d,    Xval_pqcodes,scoresVal);
-            float map = compute_mapk_100(Nval, scoresVal, Lval,3);
+            float map = compute_mapk_split(Nval, scoresVal, Lval,3, 250);
             //printf("validation score at end of epoch %d/%d: %.2f\n", epoch, epochs, map*100);
             if (map > bestMap)
             {
@@ -218,7 +218,7 @@ void sgd_train_class_pq(int cls, pq_info_t *pq,
     {
         /*printf("End of epoch %d/%d. %d updates. Accumulated loss: %.2f\n", epoch, epochs,updates, accLoss);*/
         compute_scores_pq(W,*B*params->bias_multiplier, pq, Nval,  d,   Xval_pqcodes,  scoresVal);
-        float map = compute_mapk_100(Nval, scoresVal, Lval,3);
+        float map = compute_mapk_split(Nval, scoresVal, Lval,3,250);
 
         if (map > bestMap)
         {

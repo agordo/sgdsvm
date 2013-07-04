@@ -84,11 +84,10 @@ void scaleVector_slow(int d, float *W, float f);
 float dp_slow(int d, float *a,float *b);
 
 
-float compute_top1_100(int n, float *scores, int *y);
 float compute_top1(int n, float *scores, int *y);
 
-float compute_map_100(int n, float *scores, int *y);
-float compute_mapk_100(int n, float *scores, int *y, int k);
+float compute_map_split(int n, float *scores, int *y, int s);
+float compute_mapk_split(int n, float *scores, int *y, int k, int s);
 float compute_map(int n, float *scores, int *y);
 float compute_mapk(int n, float *scores, int *y, int k);
 

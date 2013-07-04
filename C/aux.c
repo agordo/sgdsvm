@@ -205,15 +205,6 @@ float dp_slow(int d, float *a,float *b)
 }
 
 
-float compute_top1_100(int n, float *scores, int *y)
-{
-    /* Compute top1 in batches of 100 and average */
-    float macc = 0;
-    for (int i=0; i < n; i+=100)
-        macc += compute_top1(100, &scores[i], &y[i]);
-    return macc/(n/100.0);
-
-}
 
 float compute_top1(int n, float *scores, int *y)
 {
@@ -231,19 +222,19 @@ float compute_top1(int n, float *scores, int *y)
     return y[idx]==1;
 }
 
-float compute_mapk_100(int n, float *scores, int *y, int k)
+float compute_mapk_split(int n, float *scores, int *y, int k, int s)
 {
-/* Compute map@k in batches of 100 and average */
+/* Compute map@k in batches of S and average */
     float mmap = 0;
-    for (int i=0; i < n; i+=100)
-        mmap += compute_mapk(100, &scores[i], &y[i],k);
-    return mmap/(n/100.0);
+    for (int i=0; i < n; i+=s)
+        mmap += compute_mapk(s, &scores[i], &y[i],k);
+    return mmap/(n/(float)s);
 }
 
 
-float compute_map_100(int n, float *scores, int *y)
+float compute_map_split(int n, float *scores, int *y,int s)
 {
-    return compute_mapk_100(n, scores, y, n);
+    return compute_mapk_split(n, scores, y, n,s);
 }
 
 float compute_map(int n, float *scores, int *y)
